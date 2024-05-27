@@ -10,15 +10,17 @@ const Index = () => {
 
   const [tweetContent, setTweetContent] = useState("");
   const [likedTweets, setLikedTweets] = useState([]);
+  const [replyingTo, setReplyingTo] = useState(null);
 
-  const handleTweet = () => {
+  const handleTweet = (parentId = null) => {
     if (tweetContent.trim() !== "") {
       const newTweet = {
         id: tweets.length + 1,
         user: "User Name",
         username: "@username",
         content: tweetContent,
-        likes: 0
+        likes: 0,
+        parentId: parentId
       };
       setTweets([newTweet, ...tweets]);
       setTweetContent("");
@@ -34,6 +36,50 @@ const Index = () => {
       setTweets(tweets.map(tweet => tweet.id === id ? { ...tweet, likes: tweet.likes + 1 } : tweet));
     }
   };
+
+  const openReplyBox = (tweetId) => {
+    setReplyingTo(tweetId);
+  };
+
+  const Tweet = ({ tweet }) => (
+    <Box key={tweet.id} p={4} borderBottom="1px" borderColor="gray.200">
+      <HStack spacing={4}>
+        <Avatar name="User" />
+        <VStack align="start" spacing={0}>
+          <Text fontWeight="bold">{tweet.user}</Text>
+          <Text>{tweet.username}</Text>
+        </VStack>
+      </HStack>
+      <Text mt={2}>{tweet.content}</Text>
+      <HStack mt={2}>
+        <IconButton
+          size="sm"
+          icon={likedTweets.includes(tweet.id) ? <FaHeart /> : <FaRegHeart />}
+          onClick={() => handleLike(tweet.id)}
+          colorScheme={likedTweets.includes(tweet.id) ? "red" : "gray"}
+        />
+        <Text>{tweet.likes} {tweet.likes === 1 ? "Like" : "Likes"}</Text>
+        <Button size="sm" onClick={() => openReplyBox(tweet.id)}>Reply</Button>
+      </HStack>
+      {replyingTo === tweet.id && (
+        <HStack spacing={4} p={4} borderBottom="1px" borderColor="gray.200">
+          <Avatar name="User" />
+          <Textarea 
+            placeholder="Write a reply..." 
+            resize="none" 
+            value={tweetContent} 
+            onChange={(e) => setTweetContent(e.target.value)} 
+          />
+          <Button onClick={() => handleTweet(tweet.id)} colorScheme="blue">Reply</Button>
+        </HStack>
+      )}
+      <VStack spacing={4} align="stretch" pl={8}>
+        {tweets.filter(t => t.parentId === tweet.id).map(reply => (
+          <Tweet key={reply.id} tweet={reply} />
+        ))}
+      </VStack>
+    </Box>
+  );
 
   return (
     <Container maxW="container.xl" p={0}>
@@ -74,31 +120,13 @@ const Index = () => {
               value={tweetContent} 
               onChange={(e) => setTweetContent(e.target.value)} 
             />
-            <Button onClick={handleTweet} colorScheme="blue">Tweet</Button>
+            <Button onClick={() => handleTweet()} colorScheme="blue">Tweet</Button>
           </HStack>
 
           {/* Tweets */}
           <VStack spacing={4} align="stretch">
-            {tweets.map((tweet) => (
-              <Box key={tweet.id} p={4} borderBottom="1px" borderColor="gray.200">
-                <HStack spacing={4}>
-                  <Avatar name="User" />
-                  <VStack align="start" spacing={0}>
-                    <Text fontWeight="bold">{tweet.user}</Text>
-                    <Text>{tweet.username}</Text>
-                  </VStack>
-                </HStack>
-                <Text mt={2}>{tweet.content}</Text>
-                <HStack mt={2}>
-                  <IconButton
-                    size="sm"
-                    icon={likedTweets.includes(tweet.id) ? <FaHeart /> : <FaRegHeart />}
-                    onClick={() => handleLike(tweet.id)}
-                    colorScheme={likedTweets.includes(tweet.id) ? "red" : "gray"}
-                  />
-                  <Text>{tweet.likes} {tweet.likes === 1 ? "Like" : "Likes"}</Text>
-                </HStack>
-              </Box>
+            {tweets.filter(tweet => !tweet.parentId).map((tweet) => (
+              <Tweet key={tweet.id} tweet={tweet} />
             ))}
           </VStack>
         </VStack>
