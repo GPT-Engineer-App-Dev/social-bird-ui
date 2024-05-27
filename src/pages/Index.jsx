@@ -1,6 +1,6 @@
 import { Box, Container, VStack, HStack, IconButton, Input, Textarea, Avatar, Text, Divider, Flex, Button } from "@chakra-ui/react";
 import { useState } from "react";
-import { FaHome, FaHashtag, FaBell, FaEnvelope, FaUser } from "react-icons/fa";
+import { FaHome, FaHashtag, FaBell, FaEnvelope, FaUser, FaHeart, FaRegHeart } from "react-icons/fa";
 
 const Index = () => {
   const [tweets, setTweets] = useState([
@@ -9,6 +9,7 @@ const Index = () => {
   ]);
 
   const [tweetContent, setTweetContent] = useState("");
+  const [likedTweets, setLikedTweets] = useState([]);
 
   const handleTweet = () => {
     if (tweetContent.trim() !== "") {
@@ -25,7 +26,13 @@ const Index = () => {
   };
 
   const handleLike = (id) => {
-    setTweets(tweets.map(tweet => tweet.id === id ? { ...tweet, likes: tweet.likes + 1 } : tweet));
+    if (likedTweets.includes(id)) {
+      setLikedTweets(likedTweets.filter(tweetId => tweetId !== id));
+      setTweets(tweets.map(tweet => tweet.id === id ? { ...tweet, likes: tweet.likes - 1 } : tweet));
+    } else {
+      setLikedTweets([...likedTweets, id]);
+      setTweets(tweets.map(tweet => tweet.id === id ? { ...tweet, likes: tweet.likes + 1 } : tweet));
+    }
   };
 
   return (
@@ -83,7 +90,12 @@ const Index = () => {
                 </HStack>
                 <Text mt={2}>{tweet.content}</Text>
                 <HStack mt={2}>
-                  <Button size="sm" onClick={() => handleLike(tweet.id)}>Like</Button>
+                  <IconButton
+                    size="sm"
+                    icon={likedTweets.includes(tweet.id) ? <FaHeart /> : <FaRegHeart />}
+                    onClick={() => handleLike(tweet.id)}
+                    colorScheme={likedTweets.includes(tweet.id) ? "red" : "gray"}
+                  />
                   <Text>{tweet.likes} {tweet.likes === 1 ? "Like" : "Likes"}</Text>
                 </HStack>
               </Box>
