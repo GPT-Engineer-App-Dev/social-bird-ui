@@ -1,7 +1,28 @@
-import { Box, Container, VStack, HStack, IconButton, Input, Textarea, Avatar, Text, Divider, Flex } from "@chakra-ui/react";
+import { Box, Container, VStack, HStack, IconButton, Input, Textarea, Avatar, Text, Divider, Flex, Button } from "@chakra-ui/react";
+import { useState } from "react";
 import { FaHome, FaHashtag, FaBell, FaEnvelope, FaUser } from "react-icons/fa";
 
 const Index = () => {
+  const [tweets, setTweets] = useState([
+    { id: 1, user: "User Name", username: "@username", content: "This is a sample tweet. It contains some text to show how a tweet looks." },
+    { id: 2, user: "User Name", username: "@username", content: "This is another sample tweet. It contains some text to show how a tweet looks." }
+  ]);
+
+  const [tweetContent, setTweetContent] = useState("");
+
+  const handleTweet = () => {
+    if (tweetContent.trim() !== "") {
+      const newTweet = {
+        id: tweets.length + 1,
+        user: "User Name",
+        username: "@username",
+        content: tweetContent
+      };
+      setTweets([newTweet, ...tweets]);
+      setTweetContent("");
+    }
+  };
+
   return (
     <Container maxW="container.xl" p={0}>
       <HStack spacing={0} align="stretch">
@@ -35,35 +56,29 @@ const Index = () => {
           {/* Tweet Input Box */}
           <HStack spacing={4} p={4} borderBottom="1px" borderColor="gray.200">
             <Avatar name="User" />
-            <Textarea placeholder="What's happening?" resize="none" />
+            <Textarea 
+              placeholder="What's happening?" 
+              resize="none" 
+              value={tweetContent} 
+              onChange={(e) => setTweetContent(e.target.value)} 
+            />
+            <Button onClick={handleTweet} colorScheme="blue">Tweet</Button>
           </HStack>
 
           {/* Tweets */}
           <VStack spacing={4} align="stretch">
-            <Box p={4} borderBottom="1px" borderColor="gray.200">
-              <HStack spacing={4}>
-                <Avatar name="User" />
-                <VStack align="start" spacing={0}>
-                  <Text fontWeight="bold">User Name</Text>
-                  <Text>@username</Text>
-                </VStack>
-              </HStack>
-              <Text mt={2}>
-                This is a sample tweet. It contains some text to show how a tweet looks.
-              </Text>
-            </Box>
-            <Box p={4} borderBottom="1px" borderColor="gray.200">
-              <HStack spacing={4}>
-                <Avatar name="User" />
-                <VStack align="start" spacing={0}>
-                  <Text fontWeight="bold">User Name</Text>
-                  <Text>@username</Text>
-                </VStack>
-              </HStack>
-              <Text mt={2}>
-                This is another sample tweet. It contains some text to show how a tweet looks.
-              </Text>
-            </Box>
+            {tweets.map((tweet) => (
+              <Box key={tweet.id} p={4} borderBottom="1px" borderColor="gray.200">
+                <HStack spacing={4}>
+                  <Avatar name="User" />
+                  <VStack align="start" spacing={0}>
+                    <Text fontWeight="bold">{tweet.user}</Text>
+                    <Text>{tweet.username}</Text>
+                  </VStack>
+                </HStack>
+                <Text mt={2}>{tweet.content}</Text>
+              </Box>
+            ))}
           </VStack>
         </VStack>
 
