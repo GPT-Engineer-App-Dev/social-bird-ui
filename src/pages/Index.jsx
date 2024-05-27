@@ -4,21 +4,23 @@ import { FaHome, FaHashtag, FaBell, FaEnvelope, FaUser, FaHeart, FaRegHeart } fr
 
 const Index = () => {
   const [tweets, setTweets] = useState([
-    { id: 1, user: "User Name", username: "@username", content: "This is a sample tweet. It contains some text to show how a tweet looks.", likes: 0 },
-    { id: 2, user: "User Name", username: "@username", content: "This is another sample tweet. It contains some text to show how a tweet looks.", likes: 0 }
+    { id: 1, user: "User Name", username: "@username", content: "This is a sample tweet. It contains some text to show how a tweet looks.", likes: 0, parentId: null },
+    { id: 2, user: "User Name", username: "@username", content: "This is another sample tweet. It contains some text to show how a tweet looks.", likes: 0, parentId: null }
   ]);
 
   const [tweetContent, setTweetContent] = useState("");
   const [likedTweets, setLikedTweets] = useState([]);
+  const [replies, setReplies] = useState({});
 
-  const handleTweet = () => {
+  const handleTweet = (parentId = null) => {
     if (tweetContent.trim() !== "") {
       const newTweet = {
         id: tweets.length + 1,
         user: "User Name",
         username: "@username",
         content: tweetContent,
-        likes: 0
+        likes: 0,
+        parentId: parentId
       };
       setTweets([newTweet, ...tweets]);
       setTweetContent("");
@@ -33,6 +35,10 @@ const Index = () => {
       setLikedTweets([...likedTweets, id]);
       setTweets(tweets.map(tweet => tweet.id === id ? { ...tweet, likes: tweet.likes + 1 } : tweet));
     }
+  };
+
+  const handleReply = (tweetId) => {
+    setReplies({ ...replies, [tweetId]: !replies[tweetId] });
   };
 
   return (
@@ -74,13 +80,13 @@ const Index = () => {
               value={tweetContent} 
               onChange={(e) => setTweetContent(e.target.value)} 
             />
-            <Button onClick={handleTweet} colorScheme="blue">Tweet</Button>
+            <Button onClick={() => handleTweet()} colorScheme="blue">Tweet</Button>
           </HStack>
 
           {/* Tweets */}
           <VStack spacing={4} align="stretch">
             {tweets.map((tweet) => (
-              <Box key={tweet.id} p={4} borderBottom="1px" borderColor="gray.200">
+              <Box key={tweet.id} p={4} borderBottom="1px" borderColor="gray.200" ml={tweet.parentId ? 8 : 0}>
                 <HStack spacing={4}>
                   <Avatar name="User" />
                   <VStack align="start" spacing={0}>
@@ -97,7 +103,20 @@ const Index = () => {
                     colorScheme={likedTweets.includes(tweet.id) ? "red" : "gray"}
                   />
                   <Text>{tweet.likes} {tweet.likes === 1 ? "Like" : "Likes"}</Text>
+                  <Button size="sm" onClick={() => handleReply(tweet.id)}>Reply</Button>
                 </HStack>
+                {replies[tweet.id] && (
+                  <HStack spacing={4} p={4} borderBottom="1px" borderColor="gray.200" mt={2}>
+                    <Avatar name="User" />
+                    <Textarea 
+                      placeholder="Write a reply..." 
+                      resize="none" 
+                      value={tweetContent} 
+                      onChange={(e) => setTweetContent(e.target.value)} 
+                    />
+                    <Button onClick={() => handleTweet(tweet.id)} colorScheme="blue">Reply</Button>
+                  </HStack>
+                )}
               </Box>
             ))}
           </VStack>
