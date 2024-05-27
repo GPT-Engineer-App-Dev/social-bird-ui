@@ -4,8 +4,8 @@ import { FaHome, FaHashtag, FaBell, FaEnvelope, FaUser } from "react-icons/fa";
 
 const Index = () => {
   const [tweets, setTweets] = useState([
-    { id: 1, user: "User Name", username: "@username", content: "This is a sample tweet. It contains some text to show how a tweet looks." },
-    { id: 2, user: "User Name", username: "@username", content: "This is another sample tweet. It contains some text to show how a tweet looks." }
+    { id: 1, user: "User Name", username: "@username", content: "This is a sample tweet. It contains some text to show how a tweet looks.", likes: 0 },
+    { id: 2, user: "User Name", username: "@username", content: "This is another sample tweet. It contains some text to show how a tweet looks.", likes: 0 }
   ]);
 
   const [tweetContent, setTweetContent] = useState("");
@@ -16,11 +16,16 @@ const Index = () => {
         id: tweets.length + 1,
         user: "User Name",
         username: "@username",
-        content: tweetContent
+        content: tweetContent,
+        likes: 0
       };
       setTweets([newTweet, ...tweets]);
       setTweetContent("");
     }
+  };
+
+  const handleLike = (id) => {
+    setTweets(tweets.map(tweet => tweet.id === id ? { ...tweet, likes: tweet.likes + 1 } : tweet));
   };
 
   return (
@@ -77,6 +82,10 @@ const Index = () => {
                   </VStack>
                 </HStack>
                 <Text mt={2}>{tweet.content}</Text>
+                <HStack mt={2}>
+                  <Button size="sm" onClick={() => handleLike(tweet.id)}>Like</Button>
+                  <Text>{tweet.likes} {tweet.likes === 1 ? "Like" : "Likes"}</Text>
+                </HStack>
               </Box>
             ))}
           </VStack>
